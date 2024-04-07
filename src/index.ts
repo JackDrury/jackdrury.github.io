@@ -86,7 +86,8 @@ async function main(userQuery : string, secret : string, model_version : string)
 
                 CREATE TYPE game_result AS 
                     ENUM ('A', 'H', 'D'); 
-                'A' means the away team won, 'H' means the home team won and 'D' means the result was a draw 
+                'A' means the away team won, 'H' means the home team won and 'D' means the result was a draw. 
+                A draw means that neither team won or lost.
 
                 CREATE TABLE premier_league_matches (season_end_year SMALLINT, season_week SMALLINT, 
                 match_date DATE, home_team_name team, 
