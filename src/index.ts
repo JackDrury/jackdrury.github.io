@@ -2,8 +2,6 @@ import { createDbWorker } from "sql.js-httpvfs";
 import OpenAI from 'openai';
 import { ChatCompletionMessage, ChatCompletionMessageParam } from 'openai/resources/chat';
 
-const model_version = 'gpt-3.5-turbo-0125'
-
 const workerUrl = new URL(
   "sql.js-httpvfs/dist/sqlite.worker.js",
   import.meta.url
@@ -60,11 +58,12 @@ async function callFunction(function_call: ChatCompletionMessage.FunctionCall): 
   return await query_db(args['target_query']);
 }
 
-async function main(userQuery : string, secret : string) {
+async function main(userQuery : string, secret : string, model_version : string) {
   console.log('entered main')
+  console.log(`using the model: ${model_version}`)
 
   const openai = new OpenAI({
-    apiKey: secret, // I am definitely getting rid of this
+    apiKey: secret, 
     dangerouslyAllowBrowser: true // This is only for testing purposes, obviously it is bad
   });
   
@@ -135,12 +134,12 @@ async function main(userQuery : string, secret : string) {
     }
   }
   console.log('we are free of the for loop')
-  const final_message = messages.slice(-1)
+  const final_message = messages.pop()! // Note that we are permanently cutting this value out of messages
 
   // Create a new <div> element to contain the result
   const resultContainer = document.createElement('div');
   // Set the content of the result container to the JSON string representation of the result
-  resultContainer.textContent = JSON.stringify(final_message);
+  resultContainer.textContent = JSON.stringify(final_message.content);
 
   // Append the result container to the document body
   document.body.appendChild(resultContainer);  
@@ -151,11 +150,15 @@ async function main(userQuery : string, secret : string) {
 const handleUserInput = () => {
     const query = userInput.value;
     const secret = apiKey.value;
-    main(query,secret);
+    const model_version = model.value
+    main(query,secret, model_version);
 };
 
 const apiKey = document.getElementById('apiKey') as HTMLInputElement;
 const userInput = document.getElementById('userInput') as HTMLInputElement;
+var model = document.getElementById("model") as HTMLInputElement;
+
+//const model_version = 'gpt-3.5-turbo-0125'
 const submitButton = document.getElementById('submitButton');
 
 if (submitButton) {
