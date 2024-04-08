@@ -102,8 +102,10 @@ async function main(userQuery : string, secret : string, model_version : string)
   console.log(messages[0]);
   console.log(messages[1]);
   console.log();
+  const sql_queries: string[] = []
 
   for (let i = 0; i < 15; i++) { // lets not go crazy with a million function calls
+    console.log(`currently on loop number ${i}`)
     const completion = await openai.chat.completions.create({
       model: model_version,
       messages,
@@ -121,6 +123,7 @@ async function main(userQuery : string, secret : string, model_version : string)
 
     // If there is a function call, we generate a new message with the role 'function'.
     const result = await callFunction(message.function_call);
+    sql_queries.push(message.function_call.arguments)
     const newMessage = {
       role: 'function' as const,
       name: message.function_call.name!,
@@ -139,11 +142,17 @@ async function main(userQuery : string, secret : string, model_version : string)
 
   // Create a new <div> element to contain the result
   const resultContainer = document.createElement('div');
+  const resultContainer2 = document.createElement('div');
   // Set the content of the result container to the JSON string representation of the result
   resultContainer.textContent = JSON.stringify(final_message.content);
 
+  sql_queries.forEach((item => {
+    resultContainer2.textContent += `\n${item}`;
+  }));
+
   // Append the result container to the document body
   document.body.appendChild(resultContainer);  
+  document.body.appendChild(resultContainer2);  
   return;
 
 }
